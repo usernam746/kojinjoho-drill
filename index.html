@@ -376,6 +376,7 @@
   #adminMenu .menu-card::after { content: "›"; margin-left: auto; font-size: 20px; color: var(--ink-sub); opacity: .7; flex: 0 0 auto; }
   .dev-note { font-size: 12.5px; color: var(--ink-sub); line-height: 1.8; margin: 6px 2px 16px; }
   .dev-msg { font-size: 12px; color: var(--ink-sub); margin-top: 10px; }
+  .own-stab { margin-top: 10px; font-size: 12.5px; line-height: 1.7; color: var(--accent); background: var(--card); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 9px 12px; }
 </style>
 </head>
 <body>
@@ -539,6 +540,7 @@
             <button type="button" class="own-opt" data-s="no">ない</button>
             <button type="button" class="own-opt" data-s="unsure">わからない</button>
           </div>
+          <div class="own-stab hidden" id="ownStab"></div>
         </div>
         <button class="btn" id="btnNext">次へ</button>
       </div>
@@ -1307,6 +1309,7 @@ function renderQuestion() {
   $("qChoices").innerHTML = html;
   $("qFeedback").classList.add("hidden");
   for (const o of document.querySelectorAll(".own-opt")) o.classList.remove("is-on");
+  if ($("ownStab")) $("ownStab").classList.add("hidden");
 
   for (const btn of $("qChoices").querySelectorAll(".choice")) {
     btn.addEventListener("click", onAnswer);
@@ -1767,12 +1770,36 @@ function changePassFlow() {
   });
 }
 
+// 振り返りの一言（押すたびランダム・下からのトーン）
+const OWN_MSGS = {
+  yes: [
+    "ありそうな場面ですよね。もし迷ったら、一人で抱えず会社に相談してくださいね。",
+    "身近に起こりそうですよね。判断に迷ったら、会社に相談して大丈夫ですよ。",
+    "こういう場面、ありますよね。困ったときは一人で抱えず、会社に相談を。"
+  ],
+  unsure: [
+    "迷うところですよね。実際に迷ったときは、一人で抱えず会社に相談してくださいね。",
+    "はっきりしないこと、ありますよね。そんなときは会社に確認して大丈夫ですよ。",
+    "迷いますよね。判断に迷う場面では、一人で決めず会社に相談を。"
+  ]
+};
 // 「普段の業務でこんな場面はあったか」振り返り（単一選択・保存も送信もしない）
 $("ownOpts").addEventListener("click", function (e) {
   const b = e.target.closest(".own-opt"); if (!b) return;
   const on = b.classList.contains("is-on");
   for (const o of this.querySelectorAll(".own-opt")) o.classList.remove("is-on");
-  if (!on) b.classList.add("is-on");
+  const stab = $("ownStab");
+  if (on) { // 選択解除
+    if (stab) { stab.classList.add("hidden"); stab.textContent = ""; }
+    return;
+  }
+  b.classList.add("is-on");
+  if (stab) {
+    const pool = OWN_MSGS[b.dataset.s] || [];
+    const msg = pool.length ? pool[Math.floor(Math.random() * pool.length)] : "";
+    stab.textContent = msg;
+    stab.classList.toggle("hidden", !msg);
+  }
 });
 
 /* ---- 受講者番号・送信（成績集計GAS） ---- */
