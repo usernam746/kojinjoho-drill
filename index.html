@@ -1219,7 +1219,7 @@ function paintHome() {
 
   // ホームの表情（あいさつ・残り・カテゴリーの進み）
   const hh = new Date().getHours();
-  const greet = hh < 11 ? "おはようございます" : (hh < 18 ? "こんにちは" : "お疲れさまです");
+  const greet = (hh >= 5 && hh < 11) ? "おはようございます" : ((hh >= 11 && hh < 18) ? "こんにちは" : "お疲れさまです");
   if ($("headGreet")) $("headGreet").textContent = greet + "　今日もがんばりましょう";
   const remain = Math.max(0, rp.total - rp.cleared);
   if ($("homeRemain")) $("homeRemain").textContent = remain === 0 ? "1周クリア" : ("修了まであと " + remain + " 問");
